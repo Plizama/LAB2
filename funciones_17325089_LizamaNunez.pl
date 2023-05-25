@@ -34,6 +34,9 @@ getLetterDrive(Drive, Letter):-
 getFiles(SistemaActual, FilesActuales):-
     filesystem(_,_,_,_,_,FilesActuales,_,_,SistemaActual).
 
+getContentFile(FileBuscado,ContentFile):-
+    file(FileBuscado,ContentFile,_).
+
 getDirectory(SistemaActual, DirectoryActuales):-
     filesystem(_,_,_,_,_,_,DirectoryActuales,_,SistemaActual).
 
@@ -87,6 +90,14 @@ setSystemFiles(OriginalSystem, UpdateFile,UpdateSystem):-
     filesystem(NameSystem,Usuarios, UsuarioActual,RutaActual,Drives, _,Directory, Trash,OriginalSystem),
     filesystem(NameSystem, Usuarios,UsuarioActual,RutaActual,Drives, UpdateFile, Directory, Trash, UpdateSystem).
 
+setNewTrash(NewTrash,OriginalTrash,UpdateTrash):-
+    append(OriginalTrash,NewTrash,UpdateTrash).
+
+setSystemTrash(OriginalSystem,UpdateTrash,UpdateSystem):-
+    filesystem(NameSystem,Usuarios, UsuarioActual,RutaActual,Drives, Files,Directory, _,OriginalSystem),
+    filesystem(NameSystem, Usuarios,UsuarioActual,RutaActual,Drives, Files, Directory, UpdateTrash, UpdateSystem).
+
+    
 
 %OTRAS CAPAS
 %%
@@ -124,3 +135,11 @@ systemRegister(OriginalSystem, NewUser,UpdateSystem):-
     \+member(NewUser,OriginalUsers),
     setListUsers(NewUser, OriginalUsers, UpdateUsers),
     setSystemNewUsers(OriginalSystem, UpdateUsers, UpdateSystem).
+
+%F04: TDA system - login. (FALTA MISMO USUARIO).
+systemLogin(OriginalSystem,UserLog,UpdateSystem):-
+    getListUsers(OriginalSystem, OriginalListUsers),
+    existe(UserLog,OriginalListUsers),
+    getUserActual(OriginalSystem, OriginalUser),
+    setUserActual(UserLog, OriginalUser, UpdateUser),
+    setSystemNewLogin(OriginalSystem,UpdateUser,UpdateSystem).
