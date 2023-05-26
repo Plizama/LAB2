@@ -143,3 +143,9 @@ systemLogin(OriginalSystem,UserLog,UpdateSystem):-
     getUserActual(OriginalSystem, OriginalUser),
     setUserActual(UserLog, OriginalUser, UpdateUser),
     setSystemNewLogin(OriginalSystem,UpdateUser,UpdateSystem).
+
+%F05:TDA system - logout (IDENTIFICAR LISTA VACIA).
+%asumendo que S tiene sesión iniciada con “user1”
+%systemLogout(S4, S5),
+systemLogout(OriginalSystem,UpdateSystem):-
+    setSystemLogout(OriginalSystem,UpdateSystem).
