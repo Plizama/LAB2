@@ -149,3 +149,11 @@ systemLogin(OriginalSystem,UserLog,UpdateSystem):-
 %systemLogout(S4, S5),
 systemLogout(OriginalSystem,UpdateSystem):-
     setSystemLogout(OriginalSystem,UpdateSystem).
+
+%F06:TDA system - switch-drive (IDENTIFICAR LISTA VACIA).
+%Cambiándose a la unidad C
+%systemSwitchDrive(S, “C”, S2).
+%systemSwitchDrive(S5, "C", S6),
+systemSwitchDrive(OriginalSystem, LetterDrive,UpdateSystem):-
+    setSystemDriveActual(OriginalSystem, LetterDrive,UpdateSystem).
+
