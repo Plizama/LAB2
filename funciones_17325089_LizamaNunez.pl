@@ -342,3 +342,14 @@ systemCd(OriginalSystem, NameDirectory, UpdateSystem):-
     filesystem(Nombre, Usuarios, UsuarioActual, RutActual, Drives, Files, Directory, Trash, Fecha,OriginalSystem),
 	filesystem(Nombre, Usuarios, UsuarioActual, RutActual, Drives, Files, Directory, Trash, Fecha,UpdateSystem).
 
+%F09: TDA system- add-file.
+%Descripcion: Predicado añade un archivo a la ruta actual.
+%Dominio: OriginalSystem(list) X NewFile(str) X UpdateSystem(list).
+%Meta Primaria: systemAddFile/3
+%Meta Secundaria: getFiles/2
+%				: setNewFile/3
+%				: setSystemFiles/3
+systemAddFile(OriginalSystem, NewFile,UpdateSystem):-
+    getFiles(OriginalSystem, OriginalFile),
+    setNewFile(NewFile,OriginalFile,UpdateFile),
+    setSystemFiles(OriginalSystem, UpdateFile,UpdateSystem).
