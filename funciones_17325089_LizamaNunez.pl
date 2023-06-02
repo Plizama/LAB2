@@ -580,3 +580,16 @@ systemAddFile(OriginalSystem, NewFile,UpdateSystem):-
     getFiles(OriginalSystem, OriginalFile),
     setNewFile(NewFile,OriginalFile,UpdateFile),
     setSystemFiles(OriginalSystem, UpdateFile,UpdateSystem).
+
+%F10: TDA system- del.
+%file
+systemDel(OriginalSystem,NameFileDeleted,UpdateSystem):-
+    getFiles(OriginalSystem, ListFiles),
+    getContenidoFile(NameFileDeleted,ListFiles,ContentFileDeleted),
+    file(NameFileDeleted,ContentFileDeleted,FileTrash),
+    getTrash(OriginalSystem, OriginalTrash),
+    setNewTrash(FileTrash,OriginalTrash,UpdateTrash),
+    setSystemTrash(OriginalSystem,UpdateTrash,TemporalSystem),
+    getFiles(OriginalSystem, FilesActuales),
+    borrarFile(NameFileDeleted,FilesActuales,NewFilesActuales),
+    setSystemFiles(TemporalSystem, NewFilesActuales,UpdateSystem).
