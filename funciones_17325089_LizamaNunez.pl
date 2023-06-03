@@ -33,13 +33,17 @@ drive(Letter, NameDrive, Capacity,[Letter, NameDrive, Capacity]).
 %Descripcion: Predicado crea un directory. 
 %Dominio: NameDirectory(str), CreatorUser(list), FechaCreacion(number), FechaModificacion(number),Atributos(list),Ubicacion(list),UpdateDirectory(str).
 %Meta Primaria: directory/7
-directory(NameDirectory, CreatorUser, FechaCreacion, FechaModificacion, Atributos, Ubicacion,[NameDirectory,CreatorUser,FechaCreacion,FechaModificacion,Atributos,Ubicacion]).
+directory(NameDirectory, CreatorUser, FechaCreacion, FechaModificacion, Atributos, Ubicacion,[NameDirectory, CreatorUser, FechaCreacion, FechaModificacion, Atributos, Ubicacion]).
 
 %Constructor file
 %Descripcion: Predicado crea un file. 
 %Dominio: NameFile(str), Contenido(list),UpdateFile(str).
 %Meta Primaria: file/3
 file(NameFile, Contenido,[NameFile, Contenido]).
+
+%%%%
+newFile(NameFile, Contenido, Ruta,[NameFile, Contenido, Ruta]).
+
 
 %CAPA SELECTORA
 
@@ -98,17 +102,50 @@ getFiles(SistemaActual, FilesActuales):-
 %Meta Secundaria: get_time/1
 getFecha(Fecha):-
     get_time(Fecha).
-    
+
+
+%%%
+getDatosDirectory(NameFile, [[NameFile, CreatorUser, FechaCreacion, FechaModificacion, Atributos,_] | _],CreatorUser,FechaCreacion,FechaModificacion,Atributos).
+getDatosDirectory(NameFile, [ _ | Tail], CreatorUser, FechaCreacion, FechaModificacion, Atributos):-
+    getDatosDirectory(NameFile, Tail, CreatorUser, FechaCreacion, FechaModificacion, Atributos).
+
 %Descripcion: Predicado obtener contenido desde file a partir de la busqueda(iteración) del nombre del file.
 %Dominio: NameFile(str), ListFiles(list), Contenido(str).
 %Meta Primaria: getContenidoFile/3
-getContenidoFile(NameFile, [[NameFile,Contenido] | _],Contenido).
+getContenidoFile(NameFile, [[NameFile,Contenido,_] | _],Contenido).
 %Descripcion: Predicado obtener contenido desde file a partir de la busqueda(iteración) del nombre del file.
 %Dominio: NameFile(str), ListFiles(list), Contenido(str).
 %Meta Primaria: getContenidoFile/3
 %Meta Secundaria: getContenidoFile/3
 getContenidoFile(NameFile, [ _ | Tail], Contenido) :-
     getContenidoFile(NameFile, Tail, Contenido).
+
+%%%
+getRutaFile(NameFile, [[NameFile,_,Ruta] | _],Ruta).
+getRutaFile(NameFile, [ _ | Tail], Ruta) :-
+    getRutaFile(NameFile, Tail, Ruta).
+
+%%%
+%substring_contenido(Sub, Str) :-
+ %   sub_atom(Str, _, _, _, Sub).
+
+
+%getStringSubstring(_,[],NameFiles,Prueba):-
+ %   Prueba = NameFiles,
+  %  !.
+%getStringSubstring(Sub, [[NameFile,_,_] | _],Original, NameFiles):-
+ %   substring_contenido(Sub, NameFile),
+  % 	append(Original,[NameFile],NameFiles).
+%getStringSubstring(Sub, [ _ | Tail], Original, NameFiles) :-
+ %   getStringSubstring(Sub, Tail, Original, NameFiles).
+    
+    
+    
+%getStringSubstring(Sub, [[NameFile,_,_] | _],NameFile):-
+ %   substring_contenido(Sub, NameFile).
+%getStringSubstring(Sub, [ _ | Tail], NameFile) :-
+ %   getStringSubstring(Sub, Tail, NameFile).
+
 
 %Descripcion: Predicado obtiene el listado de directorios en el sistema actual.
 %Dominio: SistemaActual(str), DirectoryActuales(list).
@@ -132,7 +169,7 @@ getTrash(SistemaActual, TrashActual):-
 %Meta Primaria: setaddDrives/3
 %Meta Secundaria: append/3
 setaddDrives(NewDrive, OriginalDrives, UpdateDrives):-
-    append(OriginalDrives, [NewDrive], UpdateDrives).
+    append(OriginalDrives,[NewDrive], UpdateDrives).
 
 %Descripcion: Predicado actualiza nuevo listado de drives en sistema.
 %Dominio: OriginalSystem(str), UpdateDrives(list), UpdateSystem(str).
@@ -199,16 +236,16 @@ setSystemDriveActual(OriginalSystem, LetterDrive,UpdateSystem):-
 %Meta Primaria: setNewDirectory/3
 %Meta Secundaria: append/3
 setNewDirectory(NewDirectory, OriginalDirectory, UpdateDirectories):-
-    append(OriginalDirectory, [NewDirectory], UpdateDirectories).
+    append(OriginalDirectory,[NewDirectory], UpdateDirectories).
 
 %Descripcion: Predicado actualiza el listado de directories en el sistema.
 %Dominio: OriginalSystem(str),UpdateDirectories(list), UpdateSystem(str).
 %Meta Primaria: setSystemDirectories/3
 %Meta Secundaria: filesystem/10
 %				: filesystem/10
-setSystemDirectories(OriginalSystem, UpdateDirectories,UpdateSystem):-
+setSystemDirectories(OriginalSystem,UpdateDirectories,UpdateSystem):-
     filesystem(NameSystem,Usuarios, UsuarioActual,RutaActual,Drives, Files,_, Trash,FechaCreacion,OriginalSystem),
-    filesystem(NameSystem, Usuarios,UsuarioActual,RutaActual,Drives, Files, UpdateDirectories, Trash,FechaCreacion,UpdateSystem).
+    filesystem(NameSystem, Usuarios,UsuarioActual,RutaActual,Drives, Files,UpdateDirectories, Trash,FechaCreacion,UpdateSystem).
 
 %Descripcion: Predicado agrega un nuevo file a un listado de files del sistema.
 %Dominio: NewFile(list), OriginalFile(list), UpdateFile(list).
@@ -217,6 +254,11 @@ setSystemDirectories(OriginalSystem, UpdateDirectories,UpdateSystem):-
 setNewFile(NewFile,OriginalFile,UpdateFile):-
     append(OriginalFile,[NewFile],UpdateFile).
 
+%%
+setOriginalFile(OriginalSystem,NewFile,RealNewFile):-
+    getRutaActual(OriginalSystem, RutaActual),
+    file(NameReal,ContentReal,NewFile),
+    newFile(NameReal, ContentReal, RutaActual, RealNewFile).
 %Descripcion: Predicado actualiza el listado de files en el sistema.
 %Dominio: OriginalSystem(str),UpdateFile(list), UpdateSystem(str).
 %Meta Primaria: setSystemFiles/3
@@ -319,6 +361,11 @@ slash_presente(String):-
     atom_chars(String, ListaCaracteres),
     member(/, ListaCaracteres).
 
+%%%
+punto_presente(String):-
+    atom_chars(String, ListaCaracteres),
+    member(., ListaCaracteres).
+
 %Descripcion: Predicado identifica si atomo presenta el simbolo / dentro de el listado de carecteres, retorna true o false.
 %Dominio: String(str)
 %Meta Primaria: slash_presente/1
@@ -366,7 +413,7 @@ ubicacionDirectory(N, [ _ | OtrosDirectory], Ubicacion) :-
 %Descripcion: Predicado intera listado de files en busca de un nombre de File, elimina dicho file y retorna lista con el resto.
 %Dominio: NombreFile(str),ListFiles(list), Resultado(str).
 %Meta Primaria: borrarFile/3
-borrarFile( NombreFile, [[NombreFile,_]|Resto], Resto ). 
+borrarFile( NombreFile, [[NombreFile,_,_]|Resto], Resto ). 
 %Descripcion: Predicado intera listado de files en busca de un nombre de File, elimina dicho file y retorna lista con el resto.
 %Dominio: NombreFile(str),ListFiles(list), Resultado(str).
 %Meta Primaria: borrarFile/3
@@ -383,6 +430,27 @@ borrarFile( NombreFile, [Cabeza|Resto], [Cabeza|Resultado] ) :-
 reconocer(String,TrozoString) :-
     sub_atom(String, _, _, _, TrozoString).
 
+
+primeraLetra(String, Drive):-
+    sub_atom(String,0,1,_,Letra),
+    atom_string(Letra,Drive).
+
+%sub_atom(+Atom, ?Before, ?Length, ?After, ?SubAtom)
+cortar_ruta_entreslash(Input, String) :-
+    sub_atom(Input, 3, _, 1, Atom),
+    atom_string(Atom,String).
+
+%%%
+%"D:/newFolder/"
+crearRuta(Ruta, CambioRuta):-
+    primeraLetra(Ruta, Drive),
+    cortar_ruta_entreslash(Ruta, Folder),
+    CambioRuta = [Drive , Folder].
+    
+    
+    
+
+
 %F01: TDA system - constructor.
 %Descripcion: Predicado contruye un nuevo sistema.
 %Dominio: NameSystem(str) X System(str)
@@ -391,7 +459,7 @@ reconocer(String,TrozoString) :-
 %				: filesystem/10
 system(NameSystem, System):-
     filesystemFecha(_,_,_,_,_,_,_,_,Fecha,_),
-    filesystem(NameSystem, [],[],[],[],[],[],[],Fecha, System).
+    filesystem(NameSystem,[],[],[],[],[],[],[],Fecha, System).
    
 %F02: TDA system - addDrive.
 %Descripcion: Predicado añade una nueva unidad al sistema.
@@ -487,10 +555,10 @@ systemSwitchDrive(OriginalSystem, LetterDrive,UpdateSystem):-
 systemMkdir(OriginalSystem,NameNewDirectory,UpdateSystem):-
     getUserActual(OriginalSystem, UserActual),
     getRutaActual(OriginalSystem, RutaActual),
-    getFecha(Fecha),
-    directory(NameNewDirectory,UserActual, Fecha, Fecha,[],RutaActual, NewDirectory),
+    getFecha(Fecha), 
+    directory(NameNewDirectory, UserActual, Fecha, Fecha,[], RutaActual, NewDirectory),
     getDirectory(OriginalSystem, DirectoryActuales),
-    setNewDirectory(NewDirectory, DirectoryActuales,UpdateDirectories),
+    setNewDirectory(NewDirectory,DirectoryActuales,UpdateDirectories),
     setSystemDirectories(OriginalSystem,UpdateDirectories,UpdateSystem).
 
 %F08: TDA system- cd (change directory).
@@ -577,19 +645,80 @@ systemCd(OriginalSystem, NameDirectory, UpdateSystem):-
 %				: setNewFile/3
 %				: setSystemFiles/3
 systemAddFile(OriginalSystem, NewFile,UpdateSystem):-
+    setOriginalFile(OriginalSystem,NewFile,RealNewFile),
     getFiles(OriginalSystem, OriginalFile),
-    setNewFile(NewFile,OriginalFile,UpdateFile),
+    setNewFile(RealNewFile,OriginalFile,UpdateFile),
     setSystemFiles(OriginalSystem, UpdateFile,UpdateSystem).
 
 %F10: TDA system- del.
-%file
+%file (1/5).
 systemDel(OriginalSystem,NameFileDeleted,UpdateSystem):-
     getFiles(OriginalSystem, ListFiles),
-    getContenidoFile(NameFileDeleted,ListFiles,ContentFileDeleted),
-    file(NameFileDeleted,ContentFileDeleted,FileTrash),
+   	getContenidoFile(NameFileDeleted,ListFiles,ContentFileDeleted),
+    getRutaFile(NameFileDeleted,ListFiles,RutaFileDeleted),
+    newFile(NameFileDeleted, ContentFileDeleted,RutaFileDeleted,FileTrash),
     getTrash(OriginalSystem, OriginalTrash),
     setNewTrash(FileTrash,OriginalTrash,UpdateTrash),
     setSystemTrash(OriginalSystem,UpdateTrash,TemporalSystem),
     getFiles(OriginalSystem, FilesActuales),
     borrarFile(NameFileDeleted,FilesActuales,NewFilesActuales),
     setSystemFiles(TemporalSystem, NewFilesActuales,UpdateSystem).
+
+%"*.txt" --> borra todos los archivos con extension txt.
+%systemDel(OriginalSystem,NameFileDeleted,ListNameFile):-
+    %si comienza con *  y no es *.*
+    %quitarAsterico(NameFileDeleted,ExtensionDeleted),
+    %getFiles(OriginalSystem, ListFiles),
+    %getListStringSubstring(ExtensionDeleted,ListFiles,ListNameFile).
+    %getStringSubstring(ExtensionDeleted,ListFiles,_, ListNameFile).
+
+
+%F11: TDA system-Copy
+%ARCHIVO
+%systemCopy(S,"foo.txt","D:/newFolder/",S1).
+systemCopy(OriginalSystem,NameFileCopy,NewRuta,UpdateSystem):-
+    punto_presente(NameFileCopy),
+    getFiles(OriginalSystem, ListFiles),
+    getContenidoFile(NameFileCopy,ListFiles,ContentFile),
+    crearRuta(NewRuta, CambioRuta),
+   	newFile(NameFileCopy, ContentFile,CambioRuta,FileCopy),
+    setNewFile(FileCopy,ListFiles,UpdateFile),
+    setSystemFiles(OriginalSystem, UpdateFile,UpdateSystem).
+%CARPETA
+%systemCopy(S,"folder1","D:/newFolder/",S1).
+systemCopy(OriginalSystem,NameDirectory,NewRuta,UpdateSystem):-
+    \+ punto_presente(NameDirectory),
+    getDirectory(OriginalSystem, DirectoryActuales),
+    getDatosDirectory(NameDirectory, DirectoryActuales, CreatorUser, FechaCreacion, FechaModificacion,Atributos),
+    crearRuta(NewRuta, CambioRuta),
+    directory(NameDirectory, CreatorUser, FechaCreacion, FechaModificacion, Atributos, CambioRuta, DirectoryCopy),
+    setNewDirectory(DirectoryCopy, DirectoryActuales, UpdateDirectories),
+   	setSystemDirectories(OriginalSystem,UpdateDirectories,UpdateSystem).
+
+%Copiar archivos que tengan extension en particula
+%systemCopy(S,"*.jpg","D:/newFolder/",S1).
+
+
+%Copiar todas los archivos que comiencen con ...
+%systemCopy(S,"folder1/my_","D:/newFolder/",S1).
+
+
+%%F12: TDA system-Move
+systemMove(OriginalSystem,NameFileCopy,NewRuta,UpdateSystem):-
+    punto_presente(NameFileCopy),
+    getFiles(OriginalSystem, ListFiles),
+    getContenidoFile(NameFileCopy,ListFiles,ContentFile),
+    getRutaFile(NameFileCopy,ListFiles,RutaFileDeleted),
+    crearRuta(NewRuta, CambioRuta),
+   	newFile(NameFileCopy, ContentFile,CambioRuta,FileCopy),
+    newFile(NameFileCopy, ContentFile,RutaFileDeleted,FileTrash),
+    getTrash(OriginalSystem, OriginalTrash),
+    setNewTrash(FileTrash,OriginalTrash,UpdateTrash),
+    setSystemTrash(OriginalSystem,UpdateTrash,TemporalSystem),
+    borrarFile(NameFileCopy,ListFiles,NewFilesActuales),
+    setNewFile(FileCopy,NewFilesActuales,UpdateFile),
+    setSystemFiles(TemporalSystem, UpdateFile,UpdateSystem).
+
+    
+
+
